@@ -55,7 +55,6 @@ public class Main {
     private static void handleMain(HttpExchange exchange) throws IOException {
         String filePath = "files" + exchange.getRequestURI().getPath();
         Path path = Path.of(filePath);
-        System.out.println(path.toString());
 
         if (!Files.exists(path)) {
             error404(exchange);
