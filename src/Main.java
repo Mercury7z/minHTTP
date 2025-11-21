@@ -5,6 +5,8 @@ import java.io.*;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
@@ -49,6 +51,39 @@ public class Main {
             e.printStackTrace();
         }
     }
+    //со слов учителя тут массив байтов это и есть инпут стрим тоесть можно просто влить без врайтера
+    private static void handleMain(HttpExchange exchange) throws IOException {
+        String filePath = "files" + exchange.getRequestURI().getPath();
+        Path path = Path.of(filePath);
+        System.out.println(path.toString());
+
+        if (!Files.exists(path)) {
+            error404(exchange);
+            return;
+        }
+
+        byte[] data = Files.readAllBytes(path);
+
+        exchange.getResponseHeaders().add("Content-Type", getContentType(filePath));
+        int responseCode = 200;
+        int length = 0;
+        exchange.sendResponseHeaders(responseCode,length);
+
+        exchange.getResponseBody().write(data);
+    }
+
+    private static String getContentType(String filePath) {
+        String contentType = switch (filePath.substring(filePath.lastIndexOf("."))) {
+            case ".html" -> "text/html";
+            case ".css"  -> "text/css";
+            case ".js"   -> "application/javascript";
+            case ".png"  -> "image/png";
+            case ".jpg", ".jpeg" -> "image/jpeg";
+            default -> "text/plain;charset=UTF-8";
+        };
+        return "";
+    }
+
 
     private static void handleRequest(HttpExchange exchange) {
         try {
