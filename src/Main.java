@@ -33,7 +33,7 @@ public class Main {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream,charset);
         return new BufferedReader(inputStreamReader);
     }
-    //записывает файлы тела хттп в стрим из него в принтврайтер как в прошлой домашке от туда по идее в сканер
+    //записывает файлы тела хттп в стрим из него в принтврайтер как в прошлой домашке
     private static PrintWriter getWriterFrom(HttpExchange exchange) {
         OutputStream outputStream  = exchange.getResponseBody();
         Charset charset = StandardCharsets.UTF_8;
@@ -77,7 +77,7 @@ public class Main {
     }
 
     private static void handleRequestProfile(HttpExchange exchange) throws IOException {
-        //тут будет выбивать ошибку 404
+        error404(exchange);
         return;
     }
 
@@ -91,6 +91,23 @@ public class Main {
         String data = String.format("%s: %s%n%n",msg,method);
         try {
             writer.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void error404(HttpExchange exchange) {
+        String msg = "Такого документа нет 404";
+        try {
+            exchange.getResponseHeaders().add("content-Type", "text/plain;charset=UTF-8");
+            int responseCode = 404;
+            int length = 0;
+            exchange.sendResponseHeaders(responseCode,length);
+            try (PrintWriter writer = getWriterFrom(exchange)){
+
+                writer.write(msg );
+                writer.flush();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
